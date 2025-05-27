@@ -21,7 +21,7 @@
         :prop="'[' + index + '].name'"
         :rules="useRegistrationRule.name"
       >
-        <el-input size="small" v-model="dynamicInputFields[index].name" />
+        <el-input size="small" v-model="dynamicInputFields[index].name" maxlength="16" />
       </el-form-item>
 
       <el-form-item
@@ -29,7 +29,11 @@
         :prop="'[' + index + '].credits'"
         :rules="useRegistrationRule.credits"
       >
-        <el-input size="small" v-model.number="dynamicInputFields[index].credits" />
+        <el-input
+          size="small"
+          v-model.number="dynamicInputFields[index].credits"
+          @input="onCreditInput($event, index)"
+        />
       </el-form-item>
     </div>
 
@@ -59,6 +63,23 @@ const numberOfPlayers = Number(localStorage.getItem('playerCount')) || 0
 const dynamicInputFields = ref<Player[]>(
   Array.from({ length: numberOfPlayers }, () => ({ name: '', credits: null })),
 )
+
+// Ensure the value does not exceed 1 billion
+const onCreditInput = (value: string, index: number) => {
+  const numericValue = Number(value)
+
+  if (!Number.isNaN(numericValue)) {
+    if (numericValue > 1000000000) {
+      dynamicInputFields.value[index].credits = 1000000000
+    } else if (numericValue < 0) {
+      dynamicInputFields.value[index].credits = 0
+    } else {
+      dynamicInputFields.value[index].credits = numericValue
+    }
+  } else {
+    dynamicInputFields.value[index].credits = null
+  }
+}
 
 const onSubmit = async () => {
   try {
@@ -150,6 +171,12 @@ const isLastInOddArray = (index: number): boolean => {
   border: none !important;
 }
 
+:deep(.el-input-number) {
+  max-width: 250px;
+  width: 250px;
+  border: none !important;
+}
+
 :deep(.el-input__wrapper) {
   padding: 0.2rem 0.5rem;
   border-bottom: 1px solid black;
@@ -164,7 +191,6 @@ const isLastInOddArray = (index: number): boolean => {
   text-transform: uppercase;
   letter-spacing: 1.2px;
 }
-
 
 @media screen and (max-width: 768px) and (orientation: landscape) {
   .el-form {
