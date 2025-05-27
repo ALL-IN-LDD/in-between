@@ -18,13 +18,13 @@ type ValidatorRule = FormItemRule & {
 
 export const useRegistrationRule = reactive<FormRules>({
   name: [
-    { required: true, message: 'Please input username', trigger: 'change' },
-    { min: 4, message: 'Length should be 4 and above', trigger: 'change' },
-    { max: 16, message: 'Length should be only 16 characters long', trigger: 'change' },
+    { required: true, message: 'Please input username', trigger: 'blur' },
+    { min: 4, message: 'Length should be 4 and above', trigger: 'blur' },
+    { max: 16, message: 'Length should be only 16 characters long', trigger: 'blur' },
   ],
   credits: [
-    { required: true, message: 'Please input Credit Score', trigger: 'change' },
-    { type: 'number', message: 'Credit must be a number' },
+    { required: true, message: 'Please input Credit Score', trigger: 'blur' },
+    { type: 'number', message: 'Credit must be a number', trigger: 'blur' },
     {
       validator: (rule: FormItemRule, value: number, callback: ValidatorCallback) => {
         if (value === null || value < 200) {
@@ -35,9 +35,7 @@ export const useRegistrationRule = reactive<FormRules>({
           callback()
         }
       },
-      trigger: 'change',
+      trigger: 'blur',
     } as ValidatorRule,
   ],
 })
-
-

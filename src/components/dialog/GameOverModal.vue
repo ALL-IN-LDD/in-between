@@ -13,9 +13,10 @@
 
 <script setup lang="ts">
 import { useGameLifeCycle } from '@/composables/game/useGameLifeCycle'
+import { useGameStore } from '@/stores/game-store'
 
 const { startNewGame, reshuffleDeck } = useGameLifeCycle()
-
+const gameStore = useGameStore()
 // Props and emits
 defineProps<{
   show: boolean
@@ -26,11 +27,13 @@ const emit = defineEmits(['close'])
 // Handler functions
 const onNewGame = () => {
   startNewGame()
+  gameStore.foldcount = 0
   emit('close')
 }
 
 const onReshuffle = () => {
   reshuffleDeck()
+  gameStore.foldcount = 0
   emit('close')
 }
 </script>

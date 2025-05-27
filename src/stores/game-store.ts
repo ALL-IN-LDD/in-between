@@ -37,7 +37,6 @@ const createInitialState = (): GameState => ({
   currentCard: null,
   currentBet: 0,
   message: '',
-
   gameOver: false,
   equalCardsChoice: null,
   awaitingEqualChoice: false,
@@ -59,6 +58,7 @@ const createInitialState = (): GameState => ({
   roundStartPlayerIndex: 0,
   completedFullRound: false,
   isPotWin: false,
+  foldcount: 0,
 })
 
 export const useGameStore = defineStore('game', {
@@ -255,58 +255,45 @@ export const useGameStore = defineStore('game', {
     collectRakeAfterFullRound() {
       // Only collect if we have a communal pot and players
       if (this.communalPot <= 0 || this.players.length === 0) return
-      this.haltTurnTimer()
 
-      // Set the flag to true to trigger the modal
-      this.completedFullRound = true
+      const playerStore = usePlayerRegistration()
+      let totalRakeCollected = 0
 
-      // Save state first so the watcher in GameZoneView can detect the change
-      this.saveStateToLocalStorage()
+      // For multiplayer mode, collect rake from each registered player
+      for (let i = 0; i < this.players.length; i++) {
+        const playerId = this.players[i]?.id
+        if (!playerId) continue
 
-      // Delay the actual collection to give time for the modal to show
-      setTimeout(() => {
-        const playerStore = usePlayerRegistration()
-        let totalRakeCollected = 0
+        const registeredPlayerIndex = playerStore.players.findIndex((p) => p.id === playerId)
+        if (registeredPlayerIndex === -1) continue
 
-        // For multiplayer mode, collect rake from each registered player
-        for (let i = 0; i < this.players.length; i++) {
-          const playerId = this.players[i]?.id
-          if (!playerId) continue
+        const registeredPlayer = playerStore.players[registeredPlayerIndex]
+        const playerCredits = registeredPlayer.credits || 0
 
-          const registeredPlayerIndex = playerStore.players.findIndex((p) => p.id === playerId)
-          if (registeredPlayerIndex === -1) continue
+        // Collect rake or what player has if less
+        const collectedAmount = Math.min(playerCredits, this.rakeAmount)
+        registeredPlayer.credits = playerCredits - collectedAmount
+        this.communalPot += collectedAmount
+        totalRakeCollected += collectedAmount
 
-          const registeredPlayer = playerStore.players[registeredPlayerIndex]
-          const playerCredits = registeredPlayer.credits || 0
+        // Update player's pot in the game
+        this.players[i].credits = registeredPlayer.credits
+      }
 
-          // Collect rake or what player has if less
-          const collectedAmount = Math.min(playerCredits, this.rakeAmount)
-          registeredPlayer.credits = playerCredits - collectedAmount
-          this.communalPot += collectedAmount
-          totalRakeCollected += collectedAmount
+      // Save updated player data
+      localStorage.setItem('players', JSON.stringify(playerStore.players))
 
-          // Update player's pot in the game
-          this.players[i].credits = registeredPlayer.credits
-        }
+      // Show notification about rake collection
+      showNotification({
+        title: 'Rake Collected',
+        message: `Full round completed! Rake of ${totalRakeCollected} credits has been added to the pot.`,
+        type: 'info',
+      })
 
-        // Save updated player data
-        localStorage.setItem('players', JSON.stringify(playerStore.players))
+      this.message = `Full round completed! Rake of ${this.rakeAmount} collected from all players.`
 
-        // Show notification about rake collection
-        showNotification({
-          title: 'Rake Collected',
-          message: `Full round completed! Rake of ${totalRakeCollected} credits has been added to the pot.`,
-          type: 'info',
-        })
-
-        this.message = `Full round completed! Rake of ${this.rakeAmount} collected from all players.`
-
-        // Reset the round completion flag
-        this.completedFullRound = false
-
-        // Save state again after collection
-        this.saveStateToLocalStorage()
-      }, MODAL_DISPLAY_DELAY) // Use half the transition delay to ensure modal shows but game keeps moving
+      // Reset the round completion flag
+      this.completedFullRound = false
     },
     // ─────────────────────────────
     // PLAYER TURN FUNCTIONS
@@ -348,6 +335,7 @@ export const useGameStore = defineStore('game', {
       this.startTurnTimer()
       this.saveStateToLocalStorage()
     },
+
     placeBet(betAmount: number) {
       const currentPot = this.players[this.currentPlayerIndex].credits || 0
 
@@ -392,11 +380,19 @@ export const useGameStore = defineStore('game', {
       this.roundsPlayed++
       this.saveStateToLocalStorage()
 
+      this.foldcount++
+      if (this.foldcount >= 5) {
+        this.gameOver = true
+      }
+
       // Move to next player's turn
       setTimeout(() => {
         this.nextPlayerTurn()
         this.drawNewFaceUpCards()
       }, TRANSITION_DELAY)
+
+      // this.foldcount = 0
+      // console.log('ilan', this.foldcount)
     },
 
     Timeout() {
@@ -672,22 +668,19 @@ export const useGameStore = defineStore('game', {
         // Add message indicating new round
         this.message += ' Pot won! Starting new round.'
 
-        // Flag that we're handling a pot win (new flag) - set this BEFORE collecting rake
-        // This will trigger the modal to appear
+        // Collect rake for the new round
+        this.collectRake()
+
+        // Flag that we're handling a pot win (new flag)
         this.isPotWin = true
 
-        // Save state before transition to ensure watchers pick up flag change
+        // Save state before transition
         this.saveStateToLocalStorage()
 
-        // Collect rake for the new round after a slight delay so modal appears first
+        // Handle next round with a slight delay
         setTimeout(() => {
-          this.collectRake()
-
-          // Handle next round with a slight delay
-          setTimeout(() => {
-            this.drawNewFaceUpCards()
-          }, TRANSITION_DELAY / 2)
-        }, TRANSITION_DELAY / 2)
+          this.drawNewFaceUpCards()
+        }, TRANSITION_DELAY)
 
         return // Exit early to prevent the regular next turn handling
       }
@@ -804,8 +797,6 @@ export const useGameStore = defineStore('game', {
     // ─────────────────────────────
 
     collectRake() {
-      this.haltTurnTimer()
-
       const playerStore = usePlayerRegistration()
 
       // For multiplayer mode, collect rake from each registered player
@@ -836,6 +827,7 @@ export const useGameStore = defineStore('game', {
         this.communalPot += collectedAmount
 
         // Update player's pot in the game
+
         this.players[i].credits = registeredPlayer.credits
       }
 
@@ -844,9 +836,6 @@ export const useGameStore = defineStore('game', {
 
       this.message = `New round started! Rake of ${this.rakeAmount} collected from players.`
       this.saveStateToLocalStorage()
-
-      // Reset the pot win flag after collecting rake
-      this.isPotWin = false
     },
 
     // ─────────────────────────────

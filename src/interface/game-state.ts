@@ -91,4 +91,6 @@ export interface GameState {
 
   isPotWin: boolean
 
+  foldcount :number
+
 }

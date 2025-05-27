@@ -124,6 +124,7 @@ const handleAllIn = () => {
 
     // Draw the third card to determine outcome
     gameStore.drawThirdCard()
+    gameStore.foldcount = 0
   }
 }
 
@@ -131,8 +132,9 @@ const handleAllIn = () => {
  * Handle opening the bet form
  */
 const handleBetOption = () => {
-  if (playerCredits.value > 200) {
+  if (playerCredits.value > 100) {
     chooseBet.value = true
+    gameStore.foldcount = 0
   }
 }
 
