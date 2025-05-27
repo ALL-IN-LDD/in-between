@@ -29,7 +29,7 @@ export const useRegistrationRule = reactive<FormRules>({
       validator: (rule: FormItemRule, value: number, callback: ValidatorCallback) => {
         if (value === null || value < 200) {
           callback(new Error('Credit should be 200 and above'))
-        } else if (value > 100000000 || !Number.isFinite(value)) {
+        } else if (value > 1000000000 || !Number.isFinite(value)) {
           callback(new Error('Credit should be a finite number and less than 1,000,000,000'))
         } else {
           callback()
@@ -39,5 +39,3 @@ export const useRegistrationRule = reactive<FormRules>({
     } as ValidatorRule,
   ],
 })
-
-
