@@ -381,7 +381,7 @@ export const useGameStore = defineStore('game', {
       this.saveStateToLocalStorage()
 
       this.foldcount++
-      if (this.foldcount >= 5) {
+      if (this.foldcount >= 10) {
         this.gameOver = true
       }
 
