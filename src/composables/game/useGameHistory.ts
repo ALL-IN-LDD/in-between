@@ -50,7 +50,7 @@ export function useGameHistory() {
    * @returns {Array} - An array of formatted events filtered by type.
    */
   const getEventsByType = (type: GameHistoryEvent['type']) => {
-    return historyStore.getEventsByType(type).value.map(formatEvent)
+    return historyStore.getEventsByType(type).map(formatEvent)
   }
 
   /**
@@ -60,7 +60,7 @@ export function useGameHistory() {
    * @returns {Array} - An array of formatted events filtered by player.
    */
   const getEventsByPlayer = (playerId: string) => {
-    return historyStore.getEventsByPlayer(playerId).value.map(formatEvent)
+    return historyStore.getEventsByPlayer(playerId).map(formatEvent)
   }
 
   /**
@@ -70,7 +70,7 @@ export function useGameHistory() {
    * @returns {Array} - An array of formatted recent events.
    */
   const getRecentEvents = (count: number = 10) => {
-    return historyStore.getLatestEvents(count).value.map(formatEvent)
+    return historyStore.getLatestEvents(count).map(formatEvent)
   }
 
   /**
