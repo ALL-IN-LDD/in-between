@@ -22,8 +22,8 @@
     <!-- Game Over Modal -->
     <GameOverModal :show="showGameOverModal" @close="showGameOverModal = false" />
     <!-- Collect Rake Modal  -->
-    <CollectRake 
-      :show="showRakeCollectionModal" 
+    <CollectRake
+      :show="showRakeCollectionModal"
       :amount="rakeCollectionAmount"
       @hidden="onRakeModalHidden"
     />
@@ -282,6 +282,7 @@ import EventsHistory from '@/components/utilities/EventsHistory.vue'
 import router from '@/router'
 import { RAKE_AMOUNT } from '@/const/game-constants'
 import CollectRake from '@/components/CollectRake.vue'
+import { INITIAL_TURN_TIME } from '@/const/game-constants'
 
 // Add game over modal state
 const showGameOverModal = ref(false)
@@ -756,7 +757,6 @@ const handleCashOutAndQuit = () => {
   } catch (error) {
     console.error('Error removing player:', error)
   }
-  
 }
 function onRakeModalHidden() {
   // Continue with game flow if needed
@@ -764,28 +764,37 @@ function onRakeModalHidden() {
 }
 
 // Watch for changes in rake collection events
-watch(() => gameStore.completedFullRound, (newVal) => {
-  if (newVal && gameStore.communalPot > 0) {
-    // Show rake collection modal before the actual collection happens
-    showRakeCollectionModal.value = true
-    rakeCollectionAmount.value = gameStore.rakeAmount
-  }
-})
+watch(
+  () => gameStore.completedFullRound,
+  (newVal) => {
+    if (newVal && gameStore.communalPot > 0) {
+      // Show rake collection modal before the actual collection happens
+      showRakeCollectionModal.value = true
+      rakeCollectionAmount.value = gameStore.rakeAmount
+    }
+  },
+)
 
 // Watch for pot win scenario which triggers new round
-watch(() => gameStore.isPotWin, (newVal) => {
-  if (newVal) {
-    showRakeCollectionModal.value = true
-    rakeCollectionAmount.value = gameStore.rakeAmount
-  }
-})
+watch(
+  () => gameStore.isPotWin,
+  (newVal) => {
+    if (newVal) {
+      showRakeCollectionModal.value = true
+      rakeCollectionAmount.value = gameStore.rakeAmount
+    }
+  },
+)
 
-watch(() => gameStore.isPotWin, (newVal) => {
-  if (newVal) {
-    showRakeCollectionModal.value = true
-    rakeCollectionAmount.value = gameStore.rakeAmount
-  }
-})
+watch(
+  () => gameStore.isPotWin,
+  (newVal) => {
+    if (newVal) {
+      showRakeCollectionModal.value = true
+      rakeCollectionAmount.value = gameStore.rakeAmount
+    }
+  },
+)
 </script>
 
 <style lang="css" scoped>
