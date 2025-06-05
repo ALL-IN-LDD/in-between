@@ -75,26 +75,6 @@ const router = createRouter({
 // CSS Module cache
 const cssModules = new Map<string, Promise<Record<string, unknown>>>()
 
-// Define your CSS file mapping
-const cssFileMap: Record<string, string> = {
-  landing: 'landing.scss',
-  registration: 'registration.scss',
-  'registration/choose-player': 'registration-choose-player.scss', // or 'registration/choose-player.scss'
-  'admin/dashboard': 'admin-dashboard.scss', // or 'admin/dashboard.scss'
-  'game-zone/game-zone': 'game-zone.scss', // or 'game-zone/game-zone.scss'
-}
-
-// Function to resolve CSS file path
-function resolveCSSPath(styleName: string): string {
-  // Check if we have a specific mapping
-  if (cssFileMap[styleName]) {
-    return cssFileMap[styleName]
-  }
-
-  // Default: use the styleName as-is
-  return `${styleName}.scss`
-}
-
 // Function to load CSS using Vite's dynamic imports
 async function loadRouteCSS(styleName: string): Promise<void> {
   if (!styleName) {
@@ -104,8 +84,7 @@ async function loadRouteCSS(styleName: string): Promise<void> {
   try {
     // Cache the import promise
     if (!cssModules.has(styleName)) {
-      const cssFileName = resolveCSSPath(styleName)
-      const importPromise = import(`../assets/styles/${cssFileName}`)
+      const importPromise = import(`../assets/styles/${styleName}.scss`)
       cssModules.set(styleName, importPromise)
     }
 
@@ -113,10 +92,8 @@ async function loadRouteCSS(styleName: string): Promise<void> {
     await cssModules.get(styleName)
 
     // Vite automatically injects the CSS, so we don't need to do anything else
-    console.log(`✅ Loaded CSS: ${styleName}`)
   } catch (error) {
-    console.warn(`❌ Failed to load CSS module: ${styleName}`, error)
-    console.warn(`Expected file: src/assets/styles/${resolveCSSPath(styleName)}`)
+    console.warn(`Failed to load CSS module: ${styleName}`, error)
   }
 }
 
