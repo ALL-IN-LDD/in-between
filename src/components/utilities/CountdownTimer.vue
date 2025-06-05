@@ -21,27 +21,27 @@ const showResultModal = ref(false)
 
 // Maps numbers to SVG image paths for timer display
 const numberSvgs: Record<number, string> = {
-  0: '/src/assets/img/game-zone/timer/0.svg',
-  1: '/src/assets/img/game-zone/timer/1.1.svg',
-  2: '/src/assets/img/game-zone/timer/2.svg',
-  3: '/src/assets/img/game-zone/timer/3.svg',
-  4: '/src/assets/img/game-zone/timer/4.svg',
-  5: '/src/assets/img/game-zone/timer/5.svg',
-  6: '/src/assets/img/game-zone/timer/6.svg',
-  7: '/src/assets/img/game-zone/timer/7.svg',
-  8: '/src/assets/img/game-zone/timer/8.svg',
-  9: '/src/assets/img/game-zone/timer/9.9.svg',
-  10: '/src/assets/img/game-zone/timer/10.svg',
-  11: '/src/assets/img/game-zone/timer/11.svg',
-  12: '/src/assets/img/game-zone/timer/12.svg',
-  13: '/src/assets/img/game-zone/timer/13.svg',
-  14: '/src/assets/img/game-zone/timer/14.svg',
-  15: '/src/assets/img/game-zone/timer/15.svg',
-  16: '/src/assets/img/game-zone/timer/16.svg',
-  17: '/src/assets/img/game-zone/timer/17.svg',
-  18: '/src/assets/img/game-zone/timer/18.svg',
-  19: '/src/assets/img/game-zone/timer/19.svg',
-  20: '/src/assets/img/game-zone/timer/20.1.svg',
+  0: '/assets/img/game-zone/timer/0.svg',
+  1: '/assets/img/game-zone/timer/1.1.svg',
+  2: '/assets/img/game-zone/timer/2.svg',
+  3: '/assets/img/game-zone/timer/3.svg',
+  4: '/assets/img/game-zone/timer/4.svg',
+  5: '/assets/img/game-zone/timer/5.svg',
+  6: '/assets/img/game-zone/timer/6.svg',
+  7: '/assets/img/game-zone/timer/7.svg',
+  8: '/assets/img/game-zone/timer/8.svg',
+  9: '/assets/img/game-zone/timer/9.9.svg',
+  10: '/assets/img/game-zone/timer/10.svg',
+  11: '/assets/img/game-zone/timer/11.svg',
+  12: '/assets/img/game-zone/timer/12.svg',
+  13: '/assets/img/game-zone/timer/13.svg',
+  14: '/assets/img/game-zone/timer/14.svg',
+  15: '/assets/img/game-zone/timer/15.svg',
+  16: '/assets/img/game-zone/timer/16.svg',
+  17: '/assets/img/game-zone/timer/17.svg',
+  18: '/assets/img/game-zone/timer/18.svg',
+  19: '/assets/img/game-zone/timer/19.svg',
+  20: '/assets/img/game-zone/timer/20.1.svg',
 }
 
 // Local timer state
@@ -51,7 +51,7 @@ const timeRemaining = ref(0)
  * Returns appropriate SVG path based on time remaining
  */
 const getSvgSrc = (number: number): string =>
-  numberSvgs[number] || '/src/assets/img/game-zone/timer/20.svg'
+  numberSvgs[number] || '/assets/img/game-zone/timer/20.svg'
 
 /**
  * Displayed time text (currently empty)
@@ -98,8 +98,6 @@ onMounted(() => {
     }
   }, 1000)
 })
-
-
 </script>
 
 <style lang="css" scoped>
