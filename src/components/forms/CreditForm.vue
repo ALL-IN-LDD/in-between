@@ -18,6 +18,7 @@
           size="large"
           placeholder="Input Credits..."
           v-model.number="formModel.creditValue"
+          @input="handleCreditInput"
         />
       </el-form-item>
 
@@ -87,7 +88,7 @@ const rules = reactive<FormRules>({
     },
     {
       validator: (rule, value, callback) => {
-        if (value > 1000000) {
+        if (value > 1000000000) {
           callback(new Error('Credit must be less than 1,000,000'))
         } else {
           callback()
@@ -174,6 +175,22 @@ const handleSubmitCredit = async () => {
       console.error('Error adding credits:', error)
     }
   })
+}
+
+const handleCreditInput = (value: string) => {
+  const numericValue = Number(value)
+
+  if (!Number.isNaN(numericValue)) {
+    if (numericValue > 1000000000) {
+      formModel.creditValue = 1000000000
+    } else if (numericValue < 0) {
+      formModel.creditValue = 0
+    } else {
+      formModel.creditValue = numericValue
+    }
+  } else {
+    formModel.creditValue = null
+  }
 }
 </script>
 
