@@ -12,7 +12,7 @@ const routes = [
         path: '/',
         name: 'landing-page',
         component: () => import('@/views/LandingPageView.vue'),
-        meta: { title: 'In-Between', style: 'landing.scss', requireGuest: true },
+        meta: { title: 'In-Between', style: 'landing', requireGuest: true },
       },
       {
         path: '/choose-player',
@@ -20,7 +20,7 @@ const routes = [
         component: () => import('@/views/registration/ChoosePlayer.vue'),
         meta: {
           title: 'Choose Player',
-          style: 'registration/choose-player.scss',
+          style: 'registration/choose-player',
           requireGuest: true,
         },
       },
@@ -28,7 +28,7 @@ const routes = [
         path: '/registration',
         name: 'registration',
         component: () => import('@/views/registration/RegistrationView.vue'),
-        meta: { title: 'Register Player', style: 'registration.scss', requireGuest: true },
+        meta: { title: 'Register Player', style: 'registration', requireGuest: true },
       },
     ],
   },
@@ -41,7 +41,7 @@ const routes = [
         path: 'dashboard',
         name: 'dashboard',
         component: () => import('@/views/admin/DashboardView.vue'),
-        meta: { title: 'In-Between', style: 'admin/dashboard.scss', requireGuest: true },
+        meta: { title: 'In-Between', style: 'admin/dashboard', requireGuest: true },
       },
     ],
   },
@@ -54,7 +54,7 @@ const routes = [
         path: '',
         name: 'game-zone',
         component: () => import('@/views/in-game/GameZoneView.vue'),
-        meta: { title: 'Dashboard', style: 'game-zone/game-zone.scss', requireGuest: true },
+        meta: { title: 'Dashboard', style: 'game-zone/game-zone', requireGuest: true },
       },
     ],
   },
@@ -72,42 +72,29 @@ const router = createRouter({
   routes,
 })
 
-// Keep track of loaded stylesheets
-const loadedStylesheets = new Set<string>()
-let currentStylesheet: HTMLLinkElement | null = null
+// CSS Module cache
+const cssModules = new Map<string, Promise<Record<string, unknown>>>()
 
-// Function to load CSS dynamically
-function loadStylesheet(stylePath: string): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    // Remove current stylesheet if exists
-    if (currentStylesheet) {
-      currentStylesheet.remove()
-      currentStylesheet = null
+// Function to load CSS using Vite's dynamic imports
+async function loadRouteCSS(styleName: string): Promise<void> {
+  if (!styleName) {
+    return
+  }
+
+  try {
+    // Cache the import promise
+    if (!cssModules.has(styleName)) {
+      const importPromise = import(`../assets/styles/${styleName}.scss`)
+      cssModules.set(styleName, importPromise)
     }
 
-    if (!stylePath) {
-      resolve()
-      return
-    }
+    // Wait for the CSS to load
+    await cssModules.get(styleName)
 
-    // Create new link element
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.type = 'text/css'
-    link.href = `/styles/${stylePath.replace('.scss', '.css')}`
-
-    link.onload = () => {
-      currentStylesheet = link
-      loadedStylesheets.add(stylePath)
-      resolve()
-    }
-
-    link.onerror = () => {
-      reject(new Error(`Failed to load stylesheet: ${stylePath}`))
-    }
-
-    document.head.appendChild(link)
-  })
+    // Vite automatically injects the CSS, so we don't need to do anything else
+  } catch (error) {
+    console.warn(`Failed to load CSS module: ${styleName}`, error)
+  }
 }
 
 // Navigation guard to handle CSS loading
@@ -119,18 +106,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Load route-specific CSS
   if (to.meta.style && typeof to.meta.style === 'string') {
-    try {
-      await loadStylesheet(to.meta.style)
-    } catch (error) {
-      console.warn('Failed to load stylesheet:', (error as Error).message)
-      // Continue navigation even if CSS fails to load
-    }
-  } else {
-    // Remove current stylesheet if no style is specified
-    if (currentStylesheet) {
-      currentStylesheet.remove()
-      currentStylesheet = null
-    }
+    await loadRouteCSS(to.meta.style)
   }
 
   next()
