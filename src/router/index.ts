@@ -72,39 +72,34 @@ const router = createRouter({
   routes,
 })
 
-// CSS Module cache
-const cssModules = new Map<string, Promise<Record<string, unknown>>>()
+// Glob import of all SCSS files under /assets/styles and subfolders
+const cssModules = import.meta.glob('../assets/styles/**/*.scss')
 
-// Function to load CSS using Vite's dynamic imports
+// Function to load CSS using glob-based dynamic imports
 async function loadRouteCSS(styleName: string): Promise<void> {
-  if (!styleName) {
+  if (!styleName) return
+
+  const path = `../assets/styles/${styleName}.scss`
+  const importer = cssModules[path]
+
+  if (!importer) {
+    console.warn(`CSS module not found: ${path}`)
     return
   }
 
   try {
-    // Cache the import promise
-    if (!cssModules.has(styleName)) {
-      const importPromise = import(`../assets/styles/${styleName}.scss`)
-      cssModules.set(styleName, importPromise)
-    }
-
-    // Wait for the CSS to load
-    await cssModules.get(styleName)
-
-    // Vite automatically injects the CSS, so we don't need to do anything else
+    await importer()
   } catch (error) {
     console.warn(`Failed to load CSS module: ${styleName}`, error)
   }
 }
 
-// Navigation guard to handle CSS loading
+// Navigation guard to handle title updates and route-specific CSS
 router.beforeEach(async (to, from, next) => {
-  // Update document title
   if (to.meta.title && typeof to.meta.title === 'string') {
     document.title = to.meta.title
   }
 
-  // Load route-specific CSS
   if (to.meta.style && typeof to.meta.style === 'string') {
     await loadRouteCSS(to.meta.style)
   }
