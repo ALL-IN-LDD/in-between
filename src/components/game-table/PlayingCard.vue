@@ -100,7 +100,7 @@ watchEffect(() => {
  */
 function getCardImagePath(id: string | undefined): string {
   if (!id) return ''
-  return new URL(`assets/img/cards/${id}.svg`, import.meta.url).href
+  return new URL(`/assets/img/cards/${id}.svg`, import.meta.url).href
 }
 </script>
 
