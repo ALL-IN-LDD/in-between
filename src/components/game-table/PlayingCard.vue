@@ -63,7 +63,7 @@ const props = defineProps({
 /**
  * Fetches card data from local JSON file.
  */
-const { data: cardsData } = useDataFetcher<Card[]>('/src/data/cards.json')
+const { data: cardsData } = useDataFetcher<Card[]>('/data/cards.json')
 
 // ─────────────────────────────
 // Computed Properties
